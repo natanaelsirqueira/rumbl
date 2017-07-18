@@ -3,7 +3,31 @@ defmodule Rumbl.VideoController do
 
   alias Rumbl.Video
 
-  # plug :scrub_params, "video" when action in [:create, :update]
+  plug :scrub_params, "video" when action in [:create, :update]
+
+  alias Rumbl.Category
+
+  plug :load_categories when action in [:new, :create, :edit, :update]
+  plug :load_category when action in [:create, :update]
+
+  defp load_categories(conn, _) do
+    query =
+      Category
+      |> Category.alphabetical
+      |> Category.names_and_ids
+    categories = Repo.all query
+    assign(conn, :categories, categories)
+  end
+
+  defp load_category(conn, _) do
+    category =
+      case conn.params["video"]["category_id"] do
+        nil -> nil
+        category_id -> Repo.get!(Category, category_id)
+      end
+
+    assign(conn, :category, category)
+  end
 
   def action(conn, _) do
     apply(__MODULE__, action_name(conn),
@@ -19,7 +43,7 @@ defmodule Rumbl.VideoController do
     changeset =
       user
       |> build_assoc(:videos)
-      |> Video.changeset()
+      |> Video.changeset(nil)
 
     render(conn, "new.html", changeset: changeset)
   end
@@ -28,7 +52,7 @@ defmodule Rumbl.VideoController do
     changeset =
       user
       |> build_assoc(:videos)
-      |> Video.changeset(video_params)
+      |> Video.changeset(conn.assigns.category, video_params)
 
     case Repo.insert(changeset) do
       {:ok, _video} ->
@@ -46,15 +70,22 @@ defmodule Rumbl.VideoController do
   end
 
   def edit(conn, %{"id" => id}, user) do
-    video = Repo.get!(user_videos(user), id)
-    changeset = Video.changeset(video)
+    video =
+      Repo.get!(user_videos(user), id)
+      |> Repo.preload(:category)
+
+    changeset = Video.changeset(video, video.category)
     render(conn, "edit.html", video: video, changeset: changeset)
   end
 
   def update(conn, %{"id" => id, "video" => video_params}, user) do
-    video = Repo.get!(user_videos(user), id)
-    changeset = Video.changeset(video, video_params)
+    video =
+      user_videos(user)
+      |> Repo.get!(id)
+      |> Repo.preload(:category)
 
+    changeset = Video.changeset(video, conn.assigns.category, video_params)
+    IO.inspect changeset
     case Repo.update(changeset) do
       {:ok, video} ->
         conn

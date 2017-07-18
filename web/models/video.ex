@@ -6,6 +6,7 @@ defmodule Rumbl.Video do
     field :title, :string
     field :description, :string
     belongs_to :user, Rumbl.User
+    belongs_to :category, Rumbl.Category, on_replace: :nilify
 
     timestamps()
   end
@@ -13,9 +14,11 @@ defmodule Rumbl.Video do
   @doc """
   Builds a changeset based on the `struct` and `params`.
   """
-  def changeset(struct, params \\ %{}) do
+  def changeset(struct, category, params \\ %{}) do
+    IO.inspect category
     struct
     |> cast(params, [:url, :title, :description])
     |> validate_required([:url, :title, :description])
+    |> put_assoc(:category, category)
   end
 end
