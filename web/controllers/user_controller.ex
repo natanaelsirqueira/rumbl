@@ -15,13 +15,11 @@ defmodule Rumbl.UserController do
 
   def new(conn, _params) do
     changeset = User.changeset(%User{:username => ""})
-    IO.inspect changeset
     render conn, "new.html", changeset: changeset
   end
 
   def create(conn, %{"user" => user_params}) do
-    changeset = User.changeset(%User{}, user_params)
-    IO.inspect changeset
+    changeset = User.registration_changeset(%User{}, user_params)
     case Repo.insert(changeset) do
       {:ok, user} ->
         conn
