@@ -6,7 +6,7 @@ defmodule Rumbl.Video do
     field :title, :string
     field :description, :string
     belongs_to :user, Rumbl.User
-    belongs_to :category, Rumbl.Category, on_replace: :nilify
+    belongs_to :category, Rumbl.Category, on_replace: :nilify # anulates the existent relationship
 
     timestamps()
   end
@@ -19,6 +19,7 @@ defmodule Rumbl.Video do
     struct
     |> cast(params, [:url, :title, :description])
     |> validate_required([:url, :title, :description])
+    |> assoc_constraint(:category)
     |> put_assoc(:category, category)
   end
 end

@@ -2,11 +2,9 @@ defmodule Rumbl.VideoController do
   use Rumbl.Web, :controller
 
   alias Rumbl.Video
-
-  plug :scrub_params, "video" when action in [:create, :update]
-
   alias Rumbl.Category
 
+  plug :scrub_params, "video" when action in [:create, :update]
   plug :load_categories when action in [:new, :create, :edit, :update]
   plug :load_category when action in [:create, :update]
 
@@ -85,7 +83,6 @@ defmodule Rumbl.VideoController do
       |> Repo.preload(:category)
 
     changeset = Video.changeset(video, conn.assigns.category, video_params)
-    IO.inspect changeset
     case Repo.update(changeset) do
       {:ok, video} ->
         conn
