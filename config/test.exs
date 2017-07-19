@@ -18,3 +18,6 @@ config :rumbl, Rumbl.Repo,
   hostname: "localhost",
   port: 6543,
   pool: Ecto.Adapters.SQL.Sandbox
+
+config :comeonin, :bcrypt_log_rounds, 4
+config :comeonin, :pbkdf2_rounds, 1
