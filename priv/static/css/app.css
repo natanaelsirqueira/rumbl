@@ -80,6 +80,10 @@ form.link, form.button {
     border-bottom: 0;
   }
 }
+#msg-container {
+  min-height: 190px;
+}
+
 /* This file is for your main application css. */
 
 /*# sourceMappingURL=app.css.map*/

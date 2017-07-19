@@ -1474,6 +1474,87 @@ require.register("web/static/js/app.js", function(exports, require, module) {
 "use strict";
 
 require("phoenix_html");
+
+var _player = require("./player");
+
+var _player2 = _interopRequireDefault(_player);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// Brunch automatically concatenates all files in your
+// watched paths. Those paths can be configured at
+// config.paths.watched in "brunch-config.js".
+//
+// However, those files will only be executed if
+// explicitly imported. The only exception are files
+// in vendor, which are never wrapped in imports and
+// therefore are always executed.
+
+// Import dependencies
+//
+// If you no longer want to use a dependency, remember
+// to also remove its path from "config.paths.watched".
+var video = document.getElementById("video");
+
+// Import local files
+//
+// Local files can be imported directly using relative
+// paths "./socket" or full ones "web/static/js/socket".
+
+
+if (video) {
+  _player2.default.init(video.id, video.getAttribute("data-player-id"), function () {
+    console.log("player ready!");
+  });
+}
+// import socket from "./socket"
+});
+
+;require.register("web/static/js/player.js", function(exports, require, module) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var Player = {
+  player: null,
+
+  init: function init(domId, playerId, onReady) {
+    var _this = this;
+
+    window.onYouTubeIframeAPIReady = function () {
+      _this.onIframeReady(domId, playerId, onReady);
+    };
+    var youtubeScriptTag = document.createElement("script");
+    youtubeScriptTag.src = "//www.youtube.com/iframe_api";
+    document.head.appendChild(youtubeScriptTag);
+  },
+  onIframeReady: function onIframeReady(domId, playerId, _onReady) {
+    var _this2 = this;
+
+    this.player = new YT.Player(domId, {
+      height: "360",
+      width: "420",
+      videoId: playerId,
+      events: {
+        "onReady": function onReady(event) {
+          return _onReady(event);
+        },
+        "onStateChange": function onStateChange(event) {
+          return _this2.onPlayerStateChange(event);
+        }
+      }
+    });
+  },
+  onPlayerStateChange: function onPlayerStateChange(event) {},
+  getCurrentTime: function getCurrentTime() {
+    return Math.floor(this.player.getCurrentTime() * 1000);
+  },
+  seekTo: function seekTo(millsec) {
+    return this.player.seekTo(millsec / 1000);
+  }
+};
+exports.default = Player;
 });
 
 ;require.register("web/static/js/socket.js", function(exports, require, module) {
@@ -1549,8 +1630,8 @@ channel.join().receive("ok", function (resp) {
 exports.default = socket;
 });
 
-;require.alias("phoenix/priv/static/phoenix.js", "phoenix");
-require.alias("phoenix_html/priv/static/phoenix_html.js", "phoenix_html");require.register("___globals___", function(exports, require, module) {
+;require.alias("phoenix_html/priv/static/phoenix_html.js", "phoenix_html");
+require.alias("phoenix/priv/static/phoenix.js", "phoenix");require.register("___globals___", function(exports, require, module) {
   
 });})();require('___globals___');
 
