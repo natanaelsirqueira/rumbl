@@ -9,6 +9,7 @@ defmodule Rumbl.Video do
     field :slug, :string
     belongs_to :user, Rumbl.User
     belongs_to :category, Rumbl.Category, on_replace: :nilify # anulates the existent relationship
+    has_many :annotations, Rumbl.Annotation
 
     timestamps()
   end

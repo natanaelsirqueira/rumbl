@@ -1620,12 +1620,12 @@ var Video = {
       _this2.renderAnnotation(msgContainer, resp);
     });
 
-    vidChannel.on("personal_msg", function (msg) {
-      console.log(msg);
-    });
+    vidChannel.join().receive("ok", function (_ref) {
+      var annotations = _ref.annotations;
 
-    vidChannel.join().receive("ok", function (resp) {
-      return console.log("joined the video channel", resp);
+      annotations.forEach(function (ann) {
+        return _this2.renderAnnotation(msgContainer, ann);
+      });
     }).receive("error", function (reason) {
       return console.log("join failed", reason);
     });
@@ -1635,10 +1635,10 @@ var Video = {
     div.appendChild(document.createTextNode(str));
     return div.innerHTML;
   },
-  renderAnnotation: function renderAnnotation(msgContainer, _ref) {
-    var user = _ref.user,
-        body = _ref.body,
-        at = _ref.at;
+  renderAnnotation: function renderAnnotation(msgContainer, _ref2) {
+    var user = _ref2.user,
+        body = _ref2.body,
+        at = _ref2.at;
 
     var template = document.createElement("div");
 
