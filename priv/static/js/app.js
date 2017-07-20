@@ -1586,6 +1586,8 @@ var _player2 = _interopRequireDefault(_player);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 var Video = {
   init: function init(socket, element) {
     var _this = this;
@@ -1627,10 +1629,17 @@ var Video = {
     });
 
     vidChannel.on("annotation_added", function (resp) {
+      vidChannel.params.last_seen_id = resp.id;
       _this2.scheduleMessages(msgContainer, [resp]);
     });
 
     vidChannel.join().receive("ok", function (resp) {
+      var ids = resp.annotations.map(function (ann) {
+        return ann.id;
+      });
+      if (ids.length > 0) {
+        vidChannel.params.last_seen_id = Math.max.apply(Math, _toConsumableArray(ids));
+      }
       _this2.scheduleMessages(msgContainer, resp.annotations);
     }).receive("error", function (reason) {
       return console.log("join failed", reason);
