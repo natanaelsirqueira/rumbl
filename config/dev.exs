@@ -42,3 +42,5 @@ config :rumbl, Rumbl.Repo,
   hostname: "localhost",
   port: 6543,
   pool_size: 10
+
+import_config "dev.secret.exs"
