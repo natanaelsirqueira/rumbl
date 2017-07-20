@@ -1616,35 +1616,66 @@ var Video = {
       msgInput.value = "";
     });
 
-    vidChannel.on("annotation_added", function (resp) {
-      _this2.renderAnnotation(msgContainer, resp);
+    msgContainer.addEventListener("click", function (e) {
+      e.preventDefault();
+      var seconds = e.target.getAttribute("data-seek") || e.target.parentNode.getAttribute("data-seek");
+      if (!seconds) {
+        return;
+      }
+
+      _player2.default.seekTo(seconds);
     });
 
-    vidChannel.join().receive("ok", function (_ref) {
-      var annotations = _ref.annotations;
+    vidChannel.on("annotation_added", function (resp) {
+      _this2.scheduleMessages(msgContainer, [resp]);
+    });
 
-      annotations.forEach(function (ann) {
-        return _this2.renderAnnotation(msgContainer, ann);
-      });
+    vidChannel.join().receive("ok", function (resp) {
+      _this2.scheduleMessages(msgContainer, resp.annotations);
     }).receive("error", function (reason) {
       return console.log("join failed", reason);
     });
+  },
+  renderAnnotation: function renderAnnotation(msgContainer, _ref) {
+    var user = _ref.user,
+        body = _ref.body,
+        at = _ref.at;
+
+    var template = document.createElement("div");
+    template.innerHTML = "\n    <a href=\"#\" data-seek=\"" + this.esc(at) + "\">\n      [" + this.formatTime(at) + "]\n      <b>" + this.esc(user.username) + "</b>: " + this.esc(body) + "\n    </a>\n    ";
+    msgContainer.appendChild(template);
+    msgContainer.scrollTop = msgContainer.scrollHeight;
+  },
+  scheduleMessages: function scheduleMessages(msgContainer, annotations) {
+    var _this3 = this;
+
+    setTimeout(function () {
+      var ctime = _player2.default.getCurrentTime();
+      var remaining = _this3.renderAtTime(annotations, ctime, msgContainer);
+      if (remaining.length > 0) _this3.scheduleMessages(msgContainer, remaining);
+    }, 1000);
+  },
+  renderAtTime: function renderAtTime(annotations, seconds, msgContainer) {
+    var _this4 = this;
+
+    return annotations.filter(function (ann) {
+      if (ann.at > seconds) {
+        return true;
+      } else {
+        _this4.renderAnnotation(msgContainer, ann);
+        return false;
+      }
+    });
+  },
+  formatTime: function formatTime(at) {
+    var date = new Date(null);
+    date.setSeconds(at / 1000);
+    return date.toISOString().substr(14, 5);
   },
   esc: function esc(str) {
     var div = document.createElement("div");
     div.appendChild(document.createTextNode(str));
     return div.innerHTML;
-  },
-  renderAnnotation: function renderAnnotation(msgContainer, _ref2) {
-    var user = _ref2.user,
-        body = _ref2.body,
-        at = _ref2.at;
-
-    var template = document.createElement("div");
-
-    template.innerHTML = "\n    <a href=\"#\" data-seek=\"" + this.esc(at) + "\">\n      <b>" + this.esc(user.username) + "</b>: " + this.esc(body) + "\n    </a>\n    ";
-    msgContainer.appendChild(template);
-    msgContainer.scrollTop = msgContainer.scrollHeight;
   }
 };
 exports.default = Video;
