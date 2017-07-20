@@ -68,6 +68,12 @@ defmodule Rumbl.VideoController do
   end
 
   def edit(conn, %{"id" => id}, user) do
+    [id | _] = String.split(id, "-")
+    Rumbl.Endpoint.broadcast!("videos:" <> id, "annotation_added", %{
+      user: %{username: user.username},
+      body: "I'm editing this video."
+    })
+
     video =
       Repo.get!(user_videos(user), id)
       |> Repo.preload(:category)
